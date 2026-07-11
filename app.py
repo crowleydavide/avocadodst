@@ -192,3 +192,4 @@ with st.expander("Model information"):
             "Sulfur interpretation": "Percent",
         }
     )
+
