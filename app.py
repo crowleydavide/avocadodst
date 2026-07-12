@@ -827,33 +827,27 @@ if analyze:
     st.markdown("---")
     st.subheader("Results")
 
-    st.markdown(
-        f"""
-        <div class="potential-card">
-            <div
-                class="gauge"
-                style="--score:{nutrient_potential:.1f};
-                       --gauge-color:{category_color};"
-            >
-                <div class="gauge-content">
-                    <span class="gauge-score">{nutrient_potential:.0f}%</span>
-                    <span class="gauge-label">Yield potential</span>
-                </div>
-            </div>
+    with st.container(border=True):
+        st.metric(
+            label="Yield potential",
+            value=f"{nutrient_potential:.0f}%",
+            help=(
+                "Weighted nutrient-profile suitability based on the 12 "
+                "model-derived nutrient weights."
+            ),
+        )
+        st.progress(int(round(nutrient_potential)))
 
-            <div
-                class="category"
-                style="background:{category_color}20;
-                       color:{category_color};"
-            >
-                {category}
-            </div>
+        if nutrient_potential >= 90:
+            st.success(f"**{category}**")
+        elif nutrient_potential >= 75:
+            st.info(f"**{category}**")
+        elif nutrient_potential >= 55:
+            st.warning(f"**{category}**")
+        else:
+            st.error(f"**{category}**")
 
-            <p class="interpretation">{interpretation}</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        st.write(interpretation)
 
     st.write("")
 
