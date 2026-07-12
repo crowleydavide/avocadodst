@@ -1,5 +1,8 @@
+import csv
+import io
 import json
 import re
+from datetime import date
 
 import joblib
 import numpy as np
@@ -399,9 +402,221 @@ def predict_yield(entered_values):
     return max(0.0, float(prediction[0])), unmatched_features
 
 
+def calculate_profile(entered_values):
+    """Calculate all nutrient scores and the weighted profile potential."""
+    scored_nutrients = []
+    weighted_total = 0.0
+
+    for nutrient in NUTRIENTS:
+        value = float(entered_values[nutrient["id"]])
+        score = element_score(nutrient, value)
+        status, color = score_status(nutrient, value, score)
+        contribution = score * nutrient["weight"]
+        weighted_total += contribution
+
+        scored_nutrients.append(
+            {
+                **nutrient,
+                "entered": value,
+                "score": score,
+                "status": status,
+                "color": color,
+                "contribution": contribution,
+            }
+        )
+
+    return scored_nutrients, clamp(weighted_total) * 100.0
+
+
+def format_deviation(nutrient, value):
+    """Describe how far an input is from the nearest target boundary."""
+    if value < nutrient["low"]:
+        percent = 100.0 * (nutrient["low"] - value) / nutrient["low"]
+        return f"{percent:.1f}% below the modeled range", "below"
+
+    if value > nutrient["high"]:
+        percent = 100.0 * (value - nutrient["high"]) / nutrient["high"]
+        return f"{percent:.1f}% above the modeled range", "above"
+
+    return "Within the modeled range", "within"
+
+
+def historical_coverage(entered_values):
+    """Classify whether inputs are inside the model's outer reference bounds."""
+    outside = []
+    near_edge = []
+
+    for nutrient in NUTRIENTS:
+        value = float(entered_values[nutrient["id"]])
+        outer_low = nutrient["outer_low"]
+        outer_high = nutrient["outer_high"]
+
+        if value < outer_low or value > outer_high:
+            outside.append(nutrient["name"])
+            continue
+
+        span = outer_high - outer_low
+        if span <= 0:
+            continue
+
+        position = (value - outer_low) / span
+        if position <= 0.10 or position >= 0.90:
+            near_edge.append(nutrient["name"])
+
+    inside_count = len(NUTRIENTS) - len(outside)
+
+    if outside:
+        return {
+            "level": "error",
+            "label": "Outside historical coverage",
+            "message": (
+                f"{inside_count} of {len(NUTRIENTS)} inputs are inside the "
+                "outer reference boundaries. Outside: " + ", ".join(outside) + "."
+            ),
+            "outside": outside,
+            "near_edge": near_edge,
+        }
+
+    if near_edge:
+        return {
+            "level": "warning",
+            "label": "Near the edge of historical coverage",
+            "message": (
+                f"All {len(NUTRIENTS)} inputs are inside the outer reference "
+                "boundaries, but these are near an edge: "
+                + ", ".join(near_edge)
+                + "."
+            ),
+            "outside": outside,
+            "near_edge": near_edge,
+        }
+
+    return {
+        "level": "success",
+        "label": "Well represented by the historical ranges",
+        "message": (
+            f"All {len(NUTRIENTS)} inputs are comfortably inside the outer "
+            "reference boundaries used by this DST."
+        ),
+        "outside": outside,
+        "near_edge": near_edge,
+    }
+
+
+def review_summary(scored_nutrients):
+    """Create a concise deterministic summary of the main nutrient concerns."""
+    concerns = [
+        nutrient
+        for nutrient in sorted(
+            scored_nutrients,
+            key=lambda item: (item["score"], -item["weight"]),
+        )
+        if nutrient["status"] != "Optimal"
+    ]
+
+    if not concerns:
+        return (
+            "All 12 entered nutrient values are within their modeled "
+            "high-yield ranges."
+        )
+
+    phrases = []
+    for nutrient in concerns[:3]:
+        deviation, _ = format_deviation(nutrient, nutrient["entered"])
+        phrases.append(f"{nutrient['name']} is {deviation.lower()}")
+
+    if len(phrases) == 1:
+        detail = phrases[0]
+    elif len(phrases) == 2:
+        detail = f"{phrases[0]} and {phrases[1]}"
+    else:
+        detail = f"{phrases[0]}, {phrases[1]}, and {phrases[2]}"
+
+    return "Review first: " + detail + "."
+
+
+def build_csv_report(
+    orchard_name,
+    sample_id,
+    sample_date,
+    nutrient_potential,
+    predicted_yield,
+    reference_maximum,
+    coverage,
+    scored_nutrients,
+):
+    """Build a downloadable CSV summary without adding dependencies."""
+    stream = io.StringIO()
+    writer = csv.writer(stream)
+
+    writer.writerow(["Avocado Nutrient Yield Potential DST"])
+    writer.writerow(["Orchard or block", orchard_name or ""])
+    writer.writerow(["Sample or laboratory ID", sample_id or ""])
+    writer.writerow([
+        "Sample date",
+        sample_date.isoformat() if sample_date else "",
+    ])
+    writer.writerow([
+        "Nutrient profile yield potential (%)",
+        f"{nutrient_potential:.1f}",
+    ])
+    writer.writerow([
+        "Predicted yield (kg)",
+        "" if predicted_yield is None else f"{predicted_yield:.2f}",
+    ])
+    writer.writerow([
+        "Reference maximum (kg)",
+        "" if reference_maximum is None else f"{float(reference_maximum):.2f}",
+    ])
+    writer.writerow(["Historical data coverage", coverage["label"]])
+    writer.writerow([])
+    writer.writerow([
+        "Nutrient",
+        "Symbol",
+        "Entered value",
+        "Unit",
+        "Target low",
+        "Target high",
+        "Suitability (%)",
+        "Status",
+        "Deviation",
+        "Model weight (%)",
+        "Weighted contribution",
+    ])
+
+    for nutrient in scored_nutrients:
+        deviation, _ = format_deviation(nutrient, nutrient["entered"])
+        writer.writerow([
+            nutrient["name"],
+            nutrient["id"],
+            f"{nutrient['entered']:g}",
+            nutrient["unit"],
+            f"{nutrient['low']:g}",
+            f"{nutrient['high']:g}",
+            f"{nutrient['score'] * 100:.1f}",
+            nutrient["status"],
+            deviation,
+            f"{nutrient['weight'] * 100:.3f}",
+            f"{nutrient['contribution']:.6f}",
+        ])
+
+    return stream.getvalue()
+
+
+def safe_filename(value):
+    cleaned = re.sub(r"[^A-Za-z0-9_-]+", "_", value.strip())
+    return cleaned.strip("_") or "avocado_dst_results"
+
+
 def reset_inputs():
     for nutrient in NUTRIENTS:
         st.session_state[f"input_{nutrient['id']}"] = nutrient["default"]
+
+    st.session_state["show_results"] = False
+
+    for key in list(st.session_state):
+        if key.startswith("scenario_value_"):
+            del st.session_state[key]
 
 
 # ---------------------------------------------------------------------------
@@ -728,6 +943,32 @@ st.markdown(
 
 
 # ---------------------------------------------------------------------------
+# Optional sample details
+# ---------------------------------------------------------------------------
+
+with st.expander("Optional orchard and sample details"):
+    detail_columns = st.columns(3)
+
+    with detail_columns[0]:
+        orchard_name = st.text_input(
+            "Orchard or block",
+            placeholder="Example: North Block",
+        )
+
+    with detail_columns[1]:
+        sample_id = st.text_input(
+            "Sample or laboratory ID",
+            placeholder="Optional",
+        )
+
+    with detail_columns[2]:
+        sample_date = st.date_input(
+            "Sample date",
+            value=date.today(),
+        )
+
+
+# ---------------------------------------------------------------------------
 # Nutrient inputs
 # ---------------------------------------------------------------------------
 
@@ -794,37 +1035,16 @@ analyze = st.button(
     use_container_width=True,
 )
 
+if analyze:
+    st.session_state["show_results"] = True
+
 
 # ---------------------------------------------------------------------------
 # Results
 # ---------------------------------------------------------------------------
 
-if analyze:
-    scored_nutrients = []
-    weighted_total = 0.0
-
-    for nutrient in NUTRIENTS:
-        score = element_score(nutrient, entered[nutrient["id"]])
-        status, color = score_status(
-            nutrient,
-            entered[nutrient["id"]],
-            score,
-        )
-        contribution = score * nutrient["weight"]
-        weighted_total += contribution
-
-        scored_nutrients.append(
-            {
-                **nutrient,
-                "entered": entered[nutrient["id"]],
-                "score": score,
-                "status": status,
-                "color": color,
-                "contribution": contribution,
-            }
-        )
-
-    nutrient_potential = clamp(weighted_total) * 100.0
+if st.session_state.get("show_results", False):
+    scored_nutrients, nutrient_potential = calculate_profile(entered)
     category, category_color, interpretation = overall_interpretation(
         nutrient_potential
     )
@@ -839,78 +1059,84 @@ if analyze:
         prediction_error = str(error)
 
     reference_maximum = meta.get("yield_practical_max_95th_percentile")
+    coverage = historical_coverage(entered)
+    summary = review_summary(scored_nutrients)
 
     st.markdown("---")
     st.subheader("Results")
+    st.caption(
+        "The two results below answer different questions and should not be "
+        "interpreted as the same measurement."
+    )
 
-    with st.container(border=True):
-        st.metric(
-            label="Yield potential",
-            value=f"{nutrient_potential:.0f}%",
-            help=(
-                "Weighted nutrient-profile suitability based on the 12 "
-                "model-derived nutrient weights."
-            ),
-        )
-        st.progress(int(round(nutrient_potential)))
+    output_columns = st.columns(2)
 
-        if nutrient_potential >= 90:
-            st.success(f"**{category}**")
-        elif nutrient_potential >= 75:
-            st.info(f"**{category}**")
-        elif nutrient_potential >= 55:
-            st.warning(f"**{category}**")
-        else:
-            st.error(f"**{category}**")
-
-        st.write(interpretation)
-
-    st.write("")
-
-    metric_columns = st.columns(3)
-
-    with metric_columns[0]:
-        st.metric(
-            "Weighted nutrient potential",
-            f"{nutrient_potential:.0f}%",
-            help=(
-                "Weighted average of the 12 individual nutrient suitability "
-                "scores."
-            ),
-        )
-
-    with metric_columns[1]:
-        if predicted_yield is not None:
+    with output_columns[0]:
+        with st.container(border=True):
+            st.markdown("#### Nutrient Profile Yield Potential")
             st.metric(
-                "Predicted yield",
-                f"{predicted_yield:,.1f} kg",
+                label="Weighted 12-nutrient score",
+                value=f"{nutrient_potential:.0f}%",
                 help=(
-                    "Separate prediction from the saved nutrient-interaction "
-                    "yield model."
+                    "A weighted measure of how closely the entered nutrient "
+                    "profile matches the modeled high-yield profile."
                 ),
             )
-        else:
-            st.metric("Predicted yield", "Unavailable")
+            st.progress(int(round(nutrient_potential)))
 
-    with metric_columns[2]:
-        if reference_maximum is not None:
-            st.metric(
-                "Reference maximum",
-                f"{float(reference_maximum):,.1f} kg",
-                help=(
-                    "The practical 95th-percentile reference stored in the "
-                    "model metadata."
-                ),
+            if nutrient_potential >= 90:
+                st.success(f"**{category}**")
+            elif nutrient_potential >= 75:
+                st.info(f"**{category}**")
+            elif nutrient_potential >= 55:
+                st.warning(f"**{category}**")
+            else:
+                st.error(f"**{category}**")
+
+            st.write(interpretation)
+            st.caption(
+                "This is the weighted nutrient-profile score. It is not "
+                "predicted kilograms divided by the reference maximum."
             )
-        else:
-            st.metric("Reference maximum", "Not listed")
 
-    st.progress(int(round(nutrient_potential)))
+    with output_columns[1]:
+        with st.container(border=True):
+            st.markdown("#### Predicted Yield")
+
+            if predicted_yield is not None:
+                st.metric(
+                    label="Nutrient-interaction model estimate",
+                    value=f"{predicted_yield:,.1f} kg",
+                    help=(
+                        "A separate estimate from the saved interaction model. "
+                        "It can respond to combinations of nutrients."
+                    ),
+                )
+            else:
+                st.metric(
+                    label="Nutrient-interaction model estimate",
+                    value="Unavailable",
+                )
+
+            if reference_maximum is not None:
+                st.metric(
+                    label="Dataset reference maximum",
+                    value=f"{float(reference_maximum):,.1f} kg",
+                    help=(
+                        "The practical 95th-percentile yield reference stored "
+                        "in the model metadata."
+                    ),
+                )
+
+            st.caption(
+                "Predicted yield is a statistical association from the "
+                "historical dataset, not a guaranteed orchard outcome."
+            )
 
     if prediction_error:
         st.warning(
             "The weighted nutrient score was calculated successfully, but "
-            f"the separate kilogram prediction was unavailable: "
+            "the separate kilogram prediction was unavailable: "
             f"{prediction_error}"
         )
 
@@ -920,6 +1146,34 @@ if analyze:
             "features: " + ", ".join(unmatched_features)
         )
 
+    st.subheader("Historical data coverage")
+
+    if coverage["level"] == "success":
+        st.success(f"**{coverage['label']}** — {coverage['message']}")
+    elif coverage["level"] == "warning":
+        st.warning(f"**{coverage['label']}** — {coverage['message']}")
+    else:
+        st.error(f"**{coverage['label']}** — {coverage['message']}")
+
+    st.caption(
+        "This is a data-coverage indicator, not a statistical confidence "
+        "interval. Predictions deserve extra caution near or beyond the "
+        "outer reference boundaries. Chloride also has fewer usable records "
+        "than the other elements."
+    )
+
+    st.subheader("What to review first")
+
+    if all(item["status"] == "Optimal" for item in scored_nutrients):
+        st.success(summary)
+    else:
+        st.warning(summary)
+
+    st.caption(
+        "The summary identifies departures from the modeled ranges; it does "
+        "not by itself prescribe fertilizer additions or reductions."
+    )
+
     st.write("")
     result_left, result_right = st.columns([1.15, 0.85])
 
@@ -928,6 +1182,10 @@ if analyze:
 
         for nutrient in scored_nutrients:
             score_percent = int(round(nutrient["score"] * 100))
+            deviation, _ = format_deviation(
+                nutrient,
+                nutrient["entered"],
+            )
 
             with st.container(border=True):
                 st.markdown(
@@ -935,7 +1193,7 @@ if analyze:
                     f"{score_percent}% suitability**"
                 )
                 st.caption(
-                    f"{nutrient['status']}  |  "
+                    f"{nutrient['status']}  |  {deviation}  |  "
                     f"Entered: {nutrient['entered']:g} "
                     f"{nutrient['unit']}  |  "
                     f"Target: {nutrient['low']:g}–"
@@ -953,14 +1211,11 @@ if analyze:
         )[:4]
 
         for rank, nutrient in enumerate(priorities, start=1):
-            direction = "within range"
-
-            if nutrient["entered"] < nutrient["low"]:
-                direction = "below modeled range"
-            elif nutrient["entered"] > nutrient["high"]:
-                direction = "above modeled range"
-
             score_percent = int(round(nutrient["score"] * 100))
+            deviation, _ = format_deviation(
+                nutrient,
+                nutrient["entered"],
+            )
 
             with st.container(border=True):
                 st.markdown(
@@ -968,7 +1223,7 @@ if analyze:
                     f"{score_percent}% suitability**"
                 )
                 st.caption(
-                    f"{nutrient['status']} · {direction}"
+                    f"{nutrient['status']} · {deviation}"
                 )
                 st.progress(score_percent)
 
@@ -978,6 +1233,127 @@ if analyze:
             "load and local agronomic advice before changing fertilizer "
             "rates."
         )
+
+    with st.expander("Test a nutrient scenario"):
+        st.write(
+            "Change one nutrient to see how the weighted profile score and "
+            "the interaction-model yield estimate respond."
+        )
+
+        selected_name = st.selectbox(
+            "Nutrient to test",
+            options=[nutrient["name"] for nutrient in NUTRIENTS],
+            key="scenario_selected_nutrient",
+        )
+        selected_nutrient = next(
+            nutrient
+            for nutrient in NUTRIENTS
+            if nutrient["name"] == selected_name
+        )
+        scenario_key = f"scenario_value_{selected_nutrient['id']}"
+
+        if scenario_key not in st.session_state:
+            st.session_state[scenario_key] = entered[
+                selected_nutrient["id"]
+            ]
+
+        scenario_value = float(
+            st.number_input(
+                f"Scenario {selected_nutrient['name']} "
+                f"({selected_nutrient['unit']})",
+                min_value=0.0,
+                step=selected_nutrient["step"],
+                format=selected_nutrient["format"],
+                key=scenario_key,
+            )
+        )
+
+        scenario_entered = dict(entered)
+        scenario_entered[selected_nutrient["id"]] = scenario_value
+        scenario_scored, scenario_potential = calculate_profile(
+            scenario_entered
+        )
+
+        scenario_predicted_yield = None
+        try:
+            scenario_predicted_yield, _ = predict_yield(scenario_entered)
+        except Exception:
+            scenario_predicted_yield = None
+
+        scenario_columns = st.columns(3)
+
+        with scenario_columns[0]:
+            st.metric(
+                "Current profile potential",
+                f"{nutrient_potential:.1f}%",
+            )
+
+        with scenario_columns[1]:
+            st.metric(
+                "Scenario profile potential",
+                f"{scenario_potential:.1f}%",
+                delta=f"{scenario_potential - nutrient_potential:+.1f} points",
+            )
+
+        with scenario_columns[2]:
+            if (
+                predicted_yield is not None
+                and scenario_predicted_yield is not None
+            ):
+                st.metric(
+                    "Scenario predicted yield",
+                    f"{scenario_predicted_yield:,.1f} kg",
+                    delta=(
+                        f"{scenario_predicted_yield - predicted_yield:+.1f} kg"
+                    ),
+                )
+            else:
+                st.metric("Scenario predicted yield", "Unavailable")
+
+        current_deviation, _ = format_deviation(
+            selected_nutrient,
+            entered[selected_nutrient["id"]],
+        )
+        scenario_deviation, _ = format_deviation(
+            selected_nutrient,
+            scenario_value,
+        )
+
+        st.info(
+            f"{selected_nutrient['name']}: current value "
+            f"{entered[selected_nutrient['id']]:g} "
+            f"{selected_nutrient['unit']} ({current_deviation.lower()}); "
+            f"scenario value {scenario_value:g} "
+            f"{selected_nutrient['unit']} "
+            f"({scenario_deviation.lower()})."
+        )
+        st.caption(
+            "Scenario testing is a model sensitivity exercise, not a "
+            "fertilizer recommendation. Nutrient changes in an orchard may "
+            "also affect other nutrients and non-nutrient yield constraints."
+        )
+
+    report_csv = build_csv_report(
+        orchard_name=orchard_name,
+        sample_id=sample_id,
+        sample_date=sample_date,
+        nutrient_potential=nutrient_potential,
+        predicted_yield=predicted_yield,
+        reference_maximum=reference_maximum,
+        coverage=coverage,
+        scored_nutrients=scored_nutrients,
+    )
+
+    report_base = safe_filename(
+        orchard_name or sample_id or "avocado_dst_results"
+    )
+    st.download_button(
+        "Download results as CSV",
+        data=report_csv,
+        file_name=f"{report_base}.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
 
     with st.expander("How the weighted Yield Potential score is calculated"):
         st.write(
@@ -1012,6 +1388,9 @@ if analyze:
             "Sulfur unit": "Percent",
             "Yield-potential method": (
                 "Weighted average of 12 nutrient suitability scores"
+            ),
+            "Coverage indicator": (
+                "Position relative to outer nutrient reference boundaries"
             ),
         }
 
