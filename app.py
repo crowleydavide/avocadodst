@@ -1375,33 +1375,49 @@ if st.session_state.get("show_results", False):
             "kilograms."
         )
 
-    with st.expander("Model information"):
-        model_information = {
-            "Selected model": meta.get("model_name", "Not listed"),
-            "Training records": meta.get("training_records", "Not listed"),
-            "Holdout metrics": meta.get("test_metrics", "Not listed"),
-            "Weighted nutrient count": len(NUTRIENTS),
-            "Excluded": ["Year", "Sodium"],
-            "Included with caution": [
-                "Chloride — fewer usable observations"
-            ],
-            "Sulfur unit": "Percent",
-            "Yield-potential method": (
-                "Weighted average of 12 nutrient suitability scores"
-            ),
-            "Coverage indicator": (
-                "Position relative to outer nutrient reference boundaries"
-            ),
-        }
+    with st.expander("About the model and data"):
+        st.markdown(
+            """
+            This decision-support model is based on harvest and leaf-nutrient
+            data from **3,254 observations of individual avocado trees**
+            collected across a transect of the Southern California avocado
+            industry.
 
-        st.json(model_information)
+            The database combines research datasets developed by
+            **David Crowley** and **Carol Lovatt**. The research was supported
+            by the **California Avocado Commission**.
+
+            The model evaluates relationships between nutrient profiles and
+            harvested yield. It is intended for screening, comparison and
+            prioritization. It should be used together with orchard history,
+            irrigation and salinity information, crop load, soil conditions,
+            laboratory quality control and professional agronomic judgment.
+            """
+        )
+
+        st.markdown("#### What the two outputs mean")
+        st.write(
+            "**Nutrient Profile Yield Potential** is the weighted score showing "
+            "how closely the entered nutrient profile matches the modeled "
+            "high-yield nutrient ranges."
+        )
+        st.write(
+            "**Predicted Yield** is the separate estimate produced by the "
+            "saved nutrient-interaction model."
+        )
+
+        st.markdown("#### Model scope")
+        st.write(
+            "The model uses 12 nutrient elements, includes nutrient "
+            "interactions, excludes year as a predictor, and excludes sodium."
+        )
 
 
 st.markdown(
     """
     <div class="footer-note">
         Avocado Nutrient Yield-Potential DST · Sodium excluded · Chloride
-        included · Sulfur entered as percent · Screening and prioritization
+        included · Screening and prioritization
         tool, not a stand-alone fertilizer prescription
     </div>
     """,
