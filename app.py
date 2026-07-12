@@ -958,7 +958,7 @@ if analyze:
                 priority_name, priority_score = st.columns([3, 1])
 
                 with priority_name:
-                    st.markdown(f"**{rank}. {nutrient['name']}**")
+                    st.markdown(f"**{rank}) {nutrient['name']}**")
                     st.caption(
                         f"{nutrient['status']} · {direction}"
                     )
