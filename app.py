@@ -917,44 +917,30 @@ if analyze:
         st.subheader("Nutrient suitability scores")
 
         for nutrient in scored_nutrients:
-            st.markdown(
-                f"""
-                <div class="priority-item">
-                    <div class="priority-row">
-                        <div>
-                            <span class="priority-name">
-                                {nutrient['name']} ({nutrient['id']})
-                            </span>
-                            <div class="priority-meta">
-                                Entered: {nutrient['entered']:g}
-                                {nutrient['unit']} ·
-                                Target: {nutrient['low']:g}–
-                                {nutrient['high']:g} {nutrient['unit']} ·
-                                Weight: {nutrient['weight'] * 100:.1f}%
-                            </div>
-                        </div>
-                        <span
-                            class="priority-score"
-                            style="color:{nutrient['color']};"
-                        >
-                            {nutrient['score'] * 100:.0f}% ·
-                            {nutrient['status']}
-                        </span>
-                    </div>
+            score_percent = int(round(nutrient["score"] * 100))
 
-                    <div class="score-bar">
-                        <div
-                            class="score-fill"
-                            style="
-                                width:{nutrient['score'] * 100:.1f}%;
-                                background:{nutrient['color']};
-                            "
-                        ></div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.container(border=True):
+                name_col, score_col = st.columns([3, 1])
+
+                with name_col:
+                    st.markdown(
+                        f"**{nutrient['name']} ({nutrient['id']})**"
+                    )
+                    st.caption(
+                        f"Entered: {nutrient['entered']:g} "
+                        f"{nutrient['unit']}  |  "
+                        f"Target: {nutrient['low']:g}–"
+                        f"{nutrient['high']:g} {nutrient['unit']}  |  "
+                        f"Weight: {nutrient['weight'] * 100:.1f}%"
+                    )
+
+                with score_col:
+                    st.metric(
+                        label=nutrient["status"],
+                        value=f"{score_percent}%",
+                    )
+
+                st.progress(score_percent)
 
     with result_right:
         st.subheader("Priority review")
@@ -972,38 +958,30 @@ if analyze:
             elif nutrient["entered"] > nutrient["high"]:
                 direction = "above modeled range"
 
-            st.markdown(
-                f"""
-                <div class="priority-item">
-                    <div class="priority-row">
-                        <span class="priority-name">
-                            {rank}. {nutrient['name']}
-                        </span>
-                        <span
-                            class="priority-score"
-                            style="color:{nutrient['color']};"
-                        >
-                            {nutrient['score'] * 100:.0f}%
-                        </span>
-                    </div>
-                    <div class="priority-meta">
-                        {nutrient['status']} · {direction}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            score_percent = int(round(nutrient["score"] * 100))
 
-        st.markdown(
-            """
-            <p class="small-note">
-                Begin investigation with the lowest-scoring elements, but
-                consider soil conditions, irrigation water, salinity, crop
-                load and local agronomic advice before changing fertilizer
-                rates.
-            </p>
-            """,
-            unsafe_allow_html=True,
+            with st.container(border=True):
+                priority_name, priority_score = st.columns([3, 1])
+
+                with priority_name:
+                    st.markdown(f"**{rank}. {nutrient['name']}**")
+                    st.caption(
+                        f"{nutrient['status']} · {direction}"
+                    )
+
+                with priority_score:
+                    st.metric(
+                        label="Suitability",
+                        value=f"{score_percent}%",
+                    )
+
+                st.progress(score_percent)
+
+        st.caption(
+            "Begin investigation with the lowest-scoring elements, but "
+            "consider soil conditions, irrigation water, salinity, crop "
+            "load and local agronomic advice before changing fertilizer "
+            "rates."
         )
 
     with st.expander("How the weighted Yield Potential score is calculated"):
