@@ -914,26 +914,18 @@ if analyze:
             score_percent = int(round(nutrient["score"] * 100))
 
             with st.container(border=True):
-                name_col, score_col = st.columns([3, 1])
-
-                with name_col:
-                    st.markdown(
-                        f"**{nutrient['name']} ({nutrient['id']})**"
-                    )
-                    st.caption(
-                        f"Entered: {nutrient['entered']:g} "
-                        f"{nutrient['unit']}  |  "
-                        f"Target: {nutrient['low']:g}–"
-                        f"{nutrient['high']:g} {nutrient['unit']}  |  "
-                        f"Weight: {nutrient['weight'] * 100:.1f}%"
-                    )
-
-                with score_col:
-                    st.metric(
-                        label=nutrient["status"],
-                        value=f"{score_percent}%",
-                    )
-
+                st.markdown(
+                    f"**{nutrient['name']} ({nutrient['id']}) — "
+                    f"{score_percent}% suitability**"
+                )
+                st.caption(
+                    f"{nutrient['status']}  |  "
+                    f"Entered: {nutrient['entered']:g} "
+                    f"{nutrient['unit']}  |  "
+                    f"Target: {nutrient['low']:g}–"
+                    f"{nutrient['high']:g} {nutrient['unit']}  |  "
+                    f"Weight: {nutrient['weight'] * 100:.1f}%"
+                )
                 st.progress(score_percent)
 
     with result_right:
@@ -955,20 +947,13 @@ if analyze:
             score_percent = int(round(nutrient["score"] * 100))
 
             with st.container(border=True):
-                priority_name, priority_score = st.columns([3, 1])
-
-                with priority_name:
-                    st.markdown(f"**{rank}) {nutrient['name']}**")
-                    st.caption(
-                        f"{nutrient['status']} · {direction}"
-                    )
-
-                with priority_score:
-                    st.metric(
-                        label="Suitability",
-                        value=f"{score_percent}%",
-                    )
-
+                st.markdown(
+                    f"**{rank}) {nutrient['name']} — "
+                    f"{score_percent}% suitability**"
+                )
+                st.caption(
+                    f"{nutrient['status']} · {direction}"
+                )
                 st.progress(score_percent)
 
         st.caption(
