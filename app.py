@@ -248,17 +248,27 @@ def element_score(nutrient, value):
     return clamp((outer_high - value) / (outer_high - high))
 
 
-def score_status(score):
-    if score >= 0.90:
+def score_status(nutrient, value, score):
+    """Return a direction-aware nutrient status and display color."""
+    if nutrient["low"] <= value <= nutrient["high"]:
         return "Optimal", "#4c9b57"
 
+    if value < nutrient["low"]:
+        if score >= 0.70:
+            return "Slightly limiting", "#b18d18"
+
+        if score >= 0.40:
+            return "Limiting", "#d87827"
+
+        return "Strongly limiting", "#bd493d"
+
     if score >= 0.70:
-        return "Near optimal", "#b18d18"
+        return "Slightly in excess", "#b18d18"
 
     if score >= 0.40:
-        return "Limiting", "#d87827"
+        return "Excess", "#d87827"
 
-    return "Strongly limiting", "#bd493d"
+    return "Strongly in excess", "#bd493d"
 
 
 def overall_interpretation(potential):
@@ -275,7 +285,8 @@ def overall_interpretation(potential):
             "High potential",
             "#7c9638",
             "The overall nutrient profile is favorable, but one or more "
-            "elements may be reducing potential. Review the lowest scores.",
+            "elements may be below the target range or in excess. Review "
+            "the lowest scores.",
         )
 
     if potential >= 55:
@@ -283,7 +294,8 @@ def overall_interpretation(potential):
             "Moderate potential",
             "#d87827",
             "Several nutrient values differ from the modeled high-yield "
-            "profile. Prioritize diagnosis of the most limiting elements.",
+            "profile. Prioritize diagnosis of the most limiting or excessive "
+            "elements.",
         )
 
     return (
@@ -793,7 +805,11 @@ if analyze:
 
     for nutrient in NUTRIENTS:
         score = element_score(nutrient, entered[nutrient["id"]])
-        status, color = score_status(score)
+        status, color = score_status(
+            nutrient,
+            entered[nutrient["id"]],
+            score,
+        )
         contribution = score * nutrient["weight"]
         weighted_total += contribution
 
