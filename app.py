@@ -103,10 +103,34 @@ def obtener_valor_meta(seccion, caracteristica, predeterminado=np.nan):
         return float(predeterminado)
 
 
+@st.cache_resource
+def calcular_referencia_nutricional_ideal():
+    """
+    Predicción del modelo para el perfil nutricional ideal/default guardado
+    en los metadatos. Esta predicción se usa como referencia de 100%.
+    """
+    defaults = meta.get("defaults", {})
+    valores_ideales = []
+
+    for caracteristica in caracteristicas:
+        valor = defaults.get(caracteristica, np.nan)
+        try:
+            valor = float(valor)
+        except (TypeError, ValueError):
+            valor = np.nan
+        valores_ideales.append(valor)
+
+    x_ideal = np.array([valores_ideales], dtype=float)
+    return max(0.0, float(modelo.predict(x_ideal)[0]))
+
+
+REFERENCIA_NUTRICIONAL_IDEAL = calcular_referencia_nutricional_ideal()
+
+
 def predecir(valores):
     x = np.array([valores], dtype=float)
     rendimiento = max(0.0, float(modelo.predict(x)[0]))
-    referencia = float(meta.get("yield_practical_max_95th_percentile", 0.0))
+    referencia = REFERENCIA_NUTRICIONAL_IDEAL
     potencial = min(100.0, 100.0 * rendimiento / referencia) if referencia > 0 else 0.0
     return rendimiento, potencial, referencia
 
@@ -115,16 +139,16 @@ def interpretar_potencial(potencial):
     if potencial >= 80:
         return (
             "Potencial alto",
-            "Este perfil nutricional se asocia con un rendimiento alto en comparación con los datos históricos del modelo.",
+            "Este perfil nutricional se aproxima al rendimiento asociado con un perfil nutricional ideal en el modelo.",
         )
     if potencial >= 55:
         return (
             "Potencial moderado",
-            "Este perfil nutricional se asocia con un rendimiento moderado y puede haber oportunidades para mejorar el equilibrio entre nutrientes.",
+            "Este perfil nutricional muestra un potencial intermedio y puede haber oportunidades para mejorar el equilibrio entre nutrientes.",
         )
     return (
         "Potencial bajo",
-        "Este perfil nutricional se asocia con un rendimiento menor en comparación con los datos históricos del modelo.",
+        "Este perfil nutricional se encuentra considerablemente por debajo del rendimiento asociado con un perfil nutricional ideal en el modelo.",
     )
 
 
@@ -194,7 +218,7 @@ def generar_csv(identificacion, valores, rendimiento, potencial, referencia, eva
     escritor.writerow(["Resultado", "Valor"])
     escritor.writerow(["Rendimiento estimado (kg)", f"{rendimiento:.2f}"])
     escritor.writerow(["Potencial del perfil nutricional (%)", f"{potencial:.1f}"])
-    escritor.writerow(["Máximo práctico de referencia (kg)", f"{referencia:.2f}"])
+    escritor.writerow(["Rendimiento de referencia con nutrición ideal (kg)", f"{referencia:.2f}"])
     escritor.writerow([])
     escritor.writerow(["Elemento", "Valor", "Unidad", "Estado", "Interpretación"])
 
@@ -287,6 +311,11 @@ st.markdown(
         border-radius: 15px;
     }
 
+    div[data-baseweb="input"] input {
+        font-size: 1.18rem !important;
+        font-weight: 600 !important;
+    }
+
     div.stButton > button:first-child,
     div[data-testid="stDownloadButton"] > button {
         border-radius: 12px;
@@ -300,6 +329,10 @@ st.markdown(
 
         .hero h1 {
             font-size: 1.9rem;
+        }
+
+        div[data-baseweb="input"] input {
+            font-size: 1.12rem !important;
         }
     }
     </style>
@@ -334,8 +367,7 @@ with st.expander("Identificación de la muestra (opcional)"):
 
 st.subheader("Resultados del análisis foliar")
 st.caption(
-    "Ingrese los resultados del laboratorio. Use porcentajes para los macronutrientes, "
-    "el azufre y el cloruro; use ppm para los micronutrientes."
+    "Ingrese los resultados del laboratorio usando las unidades indicadas para cada nutriente."
 )
 
 valores = []
@@ -403,7 +435,7 @@ if st.session_state.get("mostrar_resultados_es", False):
     m1, m2, m3 = st.columns(3)
     m1.metric("Potencial del perfil nutricional", f"{potencial:.0f}%")
     m2.metric("Rendimiento estimado", f"{rendimiento:,.1f} kg")
-    m3.metric("Máximo práctico de referencia", f"{referencia:,.1f} kg")
+    m3.metric("Referencia con nutrición ideal", f"{referencia:,.1f} kg")
 
     st.progress(int(round(max(0.0, min(100.0, potencial)))))
     st.markdown(f"### {categoria}")
@@ -528,10 +560,6 @@ with st.expander("Información del modelo"):
         obtenidas a través de un transecto de la industria del aguacate del sur de California.
         Los datos combinan los conjuntos de **Crowley y Lovatt**, y la investigación contó
         con el apoyo de la **California Avocado Commission**.
-
-        El año y el sodio no se utilizan como variables predictoras. El cloruro está incluido
-        cuando forma parte de las variables guardadas en el modelo. El azufre se presenta como
-        porcentaje.
 
         El rendimiento real también depende del riego, clima, salinidad, carga de fruta,
         plagas, enfermedades, portainjerto, cultivar y edad del árbol.
