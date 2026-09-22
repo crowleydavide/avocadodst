@@ -1,0 +1,40 @@
+{
+  "_comment": "Illustrative software example only. The 10 percent threshold is not a scientific or management recommendation.",
+  "opportunity_threshold_pct": 10.0,
+  "include_research_context": false,
+  "available_data": [
+    "leaf.K",
+    "soil.exchangeable_K",
+    "water.EC",
+    "root.status",
+    "crop_load",
+    "leaf.Cl",
+    "water.Cl",
+    "soil.ECe",
+    "irrigation.uniformity",
+    "irrigation.drainage"
+  ],
+  "field_flags": [
+    "salinity"
+  ],
+  "interaction_flags": [
+    "KxCl"
+  ],
+  "nutrients": {
+    "K": {
+      "opportunity_pct": 14.2,
+      "reportable": true,
+      "support_status": "validated",
+      "stability": "stable",
+      "extrapolation": false
+    },
+    "CL": {
+      "opportunity_pct": null,
+      "reportable": true,
+      "support_status": "validated",
+      "stability": "stable",
+      "extrapolation": false,
+      "flagged": true
+    }
+  }
+}

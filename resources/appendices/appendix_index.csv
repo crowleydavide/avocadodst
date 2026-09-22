@@ -1,0 +1,19 @@
+appendix_id,title,kind,filename,source_pages,trigger_mode,evidence_level,max_action_level
+N,Nitrogen,nutrient,pdfs/APP-N-001_Nitrogen.pdf,3,opportunity_or_flag,established_with_context,management_context
+P,Phosphorus,nutrient,pdfs/APP-P-001_Phosphorus.pdf,4,opportunity_or_flag,established_with_context,management_context
+K,Potassium,nutrient,pdfs/APP-K-001_Potassium.pdf,8 9,opportunity_or_flag,established_with_context,management_context
+CA,Calcium,nutrient,pdfs/APP-CA-001_Calcium.pdf,5,opportunity_or_flag,established_with_context,management_context
+S,Sulfur,nutrient,pdfs/APP-S-001_Sulfur.pdf,6,opportunity_or_flag,context_dependent,diagnostic_only
+MN,Manganese,nutrient,pdfs/APP-MN-001_Manganese.pdf,7,opportunity_or_flag,diagnostic_signal,diagnostic_only
+FE,Iron,nutrient,pdfs/APP-FE-001_Iron.pdf,8,opportunity_or_flag,established_with_context,diagnostic_only
+ZN,Zinc,nutrient,pdfs/APP-ZN-001_Zinc.pdf,9,opportunity_or_flag,established_with_context,diagnostic_only
+CL,Chloride,nutrient,pdfs/APP-CL-001_Chloride.pdf,10 11,diagnostic_flag,hazard_and_context,diagnostic_only
+MG,Magnesium,nutrient,pdfs/APP-MG-001_Magnesium.pdf,10,opportunity_or_flag,established_with_context,management_context
+B,Boron,nutrient,pdfs/APP-B-001_Boron.pdf,11,opportunity_or_flag,safety_sensitive,diagnostic_only
+CTX-ROOT,Shared Root Zone Foundation,context,pdfs/CTX-ROOT-001_Shared_Root_Zone_Foundation.pdf,3,field_flag,established,diagnostic_context
+CTX-WATER,pH Water Chemistry and Irrigation,context,pdfs/CTX-WATER-001_pH_Water_Chemistry_and_Irrigation.pdf,4,field_flag,established,diagnostic_context
+CTX-BIOLOGY,Microbes Chelation and PGPR,context,pdfs/CTX-BIOLOGY-001_Microbes_Chelation_and_PGPR.pdf,5,field_flag,product_dependent,diagnostic_context
+CTX-OM,Organic Matter,context,pdfs/CTX-OM-001_Organic_Matter.pdf,6 7,field_flag,established_with_context,diagnostic_context
+CTX-MATRIX,Quick Diagnostic Matrix,context,pdfs/CTX-MATRIX-001_Quick_Diagnostic_Matrix.pdf,12,system,diagnostic_context,diagnostic_context
+CTX-INTERACTIONS,Nutrient Interaction and Root Zone Map,context,pdfs/CTX-INTERACTIONS-001_Nutrient_Interaction_and_Root_Zone_Map.pdf,12,system,mixed_established_and_research,diagnostic_context
+CTX-FIELD-DATA,Minimum Field Data Package,context,pdfs/CTX-FIELD-DATA-001_Minimum_Field_Data_Package.pdf,13,system,established,diagnostic_context

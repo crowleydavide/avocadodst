@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "policy_version": "2026.09.22",
+  "principle": "Model opportunity selects what to explain. Field evidence determines whether management language is justified.",
+  "runtime_parameters": {
+    "opportunity_threshold_pct": {
+      "required": true,
+      "default": null,
+      "description": "Report-program setting. It is deliberately not hard-coded in this library."
+    },
+    "include_research_context": {
+      "required": false,
+      "default": false,
+      "description": "When true, research-only or unstable findings may appear in a clearly labeled research section."
+    }
+  },
+  "gates": [
+    {
+      "name": "opportunity_gate",
+      "pass_when": "opportunity_pct >= opportunity_threshold_pct AND reportable is true",
+      "purpose": "Avoid attaching a nutrient appendix for trivial modeled opportunities."
+    },
+    {
+      "name": "reliability_gate",
+      "pass_when": "support_status is validated or operational AND extrapolation is false AND stability is stable or mixed",
+      "mixed_result": "Attach as diagnostic_only and add the Minimum Field Data Package.",
+      "fail_result": "Do not present as an actionable yield opportunity. Research context may be shown only when enabled."
+    },
+    {
+      "name": "interpretation_gate",
+      "pass_when": "required_data_for_management are present and appendix max_action_level permits management_context",
+      "fail_result": "Attach for diagnosis only. Do not generate a fertilizer, amendment, or irrigation prescription."
+    },
+    {
+      "name": "safety_gate",
+      "applies_to": [
+        "B",
+        "CL",
+        "MN",
+        "S",
+        "FE",
+        "ZN"
+      ],
+      "result": "Cap automated output at diagnostic_only unless a separately reviewed rule explicitly authorizes management language."
+    },
+    {
+      "name": "interaction_gate",
+      "pass_when": "two or more nutrient appendices are selected OR an interaction flag is present",
+      "result": "Attach the Nutrient Interaction and Root Zone Map. Research interactions remain non-prescriptive."
+    }
+  ],
+  "input_contract": {
+    "opportunity_threshold_pct": "number required at report runtime",
+    "include_research_context": "boolean optional",
+    "available_data": "array of manifest data keys",
+    "field_flags": "array of diagnostic flags",
+    "interaction_flags": "array such as KxCl or KxS",
+    "nutrients": {
+      "<ID>": {
+        "opportunity_pct": "number or null",
+        "reportable": "boolean",
+        "support_status": "validated | operational | provisional | research_only | unavailable",
+        "stability": "stable | mixed | unstable | unknown",
+        "extrapolation": "boolean",
+        "flagged": "boolean optional"
+      }
+    }
+  }
+}

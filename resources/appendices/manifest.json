@@ -1,0 +1,523 @@
+{
+  "schema_version": "1.0",
+  "library_version": "2026.09.22",
+  "generated_date": "2026-09-22",
+  "base_path": "resources/appendices",
+  "selection_policy": "gating_policy.json",
+  "router": "appendix_router.py",
+  "appendices": [
+    {
+      "id": "N",
+      "title": "Nitrogen",
+      "kind": "nutrient",
+      "file": "pdfs/APP-N-001_Nitrogen.pdf",
+      "source": "part2",
+      "pages": [
+        3
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "management_context",
+      "required_data_for_management": [
+        "leaf.N",
+        "irrigation.uniformity",
+        "root.status",
+        "input_history.N"
+      ],
+      "diagnostic_flags": [
+        "nitrogen",
+        "pale_canopy",
+        "nitrate_loss"
+      ],
+      "default_companions": [],
+      "notes": "Check supply, mineralization, leaching, irrigation, oxygen, and roots before increasing N.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "bc1151ba83fff8008fdd3c2c453eb95d18d26f7f5dbc623a94683a334cbaa13c"
+    },
+    {
+      "id": "P",
+      "title": "Phosphorus",
+      "kind": "nutrient",
+      "file": "pdfs/APP-P-001_Phosphorus.pdf",
+      "source": "part2",
+      "pages": [
+        4
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "management_context",
+      "required_data_for_management": [
+        "leaf.P",
+        "soil.available_P",
+        "soil.pH",
+        "root.status"
+      ],
+      "diagnostic_flags": [
+        "phosphorus",
+        "phosphorus_buildup"
+      ],
+      "default_companions": [],
+      "notes": "Interpret with pH, soil-test method, roots, Zn, and Fe. P by B is research context only.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "b5cf80afe367a91bce27a06cf7f04a15e41849ebcf5bcfe90e140154679b082c"
+    },
+    {
+      "id": "K",
+      "title": "Potassium",
+      "kind": "nutrient",
+      "file": "pdfs/APP-K-001_Potassium.pdf",
+      "source": "part1",
+      "pages": [
+        8,
+        9
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "management_context",
+      "required_data_for_management": [
+        "leaf.K",
+        "soil.exchangeable_K",
+        "water.EC",
+        "root.status",
+        "crop_load"
+      ],
+      "diagnostic_flags": [
+        "potassium",
+        "low_leaf_K",
+        "KxCl",
+        "KxS"
+      ],
+      "default_companions": [],
+      "notes": "Read with chloride, salinity, crop load, Ca, Mg, and the K by Cl signal.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "7dfd95674eade849297a7648bb0cb3bca602ce41218d104af52cd646dc49e030"
+    },
+    {
+      "id": "CA",
+      "title": "Calcium",
+      "kind": "nutrient",
+      "file": "pdfs/APP-CA-001_Calcium.pdf",
+      "source": "part2",
+      "pages": [
+        5
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "management_context",
+      "required_data_for_management": [
+        "leaf.Ca",
+        "soil.exchangeable_Ca",
+        "water.Ca",
+        "soil.pH",
+        "root.status"
+      ],
+      "diagnostic_flags": [
+        "calcium",
+        "sodicity",
+        "KxCa",
+        "CaxMg"
+      ],
+      "default_companions": [],
+      "notes": "Separate nutrient supply from soil-structure repair; avoid universal cation ratios.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "1fde9d5ea38067fb354ee19fbc359a482bd25358fa7e859689c892ab333f90b2"
+    },
+    {
+      "id": "S",
+      "title": "Sulfur",
+      "kind": "nutrient",
+      "file": "pdfs/APP-S-001_Sulfur.pdf",
+      "source": "part2",
+      "pages": [
+        6
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "context_dependent",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.S",
+        "water.sulfate",
+        "water.EC",
+        "input_history.S"
+      ],
+      "diagnostic_flags": [
+        "sulfur",
+        "sulfate",
+        "KxS"
+      ],
+      "default_companions": [
+        "CTX-WATER"
+      ],
+      "notes": "UC leaf categories overlap. K by S remains a research layer, not a fertilizer rule.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "1399a514af6057d219518b85589b5612ed994ec18d31a650f81afb70c9262793"
+    },
+    {
+      "id": "MN",
+      "title": "Manganese",
+      "kind": "nutrient",
+      "file": "pdfs/APP-MN-001_Manganese.pdf",
+      "source": "part2",
+      "pages": [
+        7
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "diagnostic_signal",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.Mn",
+        "soil.pH",
+        "root.status",
+        "root.aeration",
+        "irrigation.drainage"
+      ],
+      "diagnostic_flags": [
+        "manganese",
+        "redox",
+        "waterlogging",
+        "root_zone_stress"
+      ],
+      "default_companions": [
+        "CTX-ROOT"
+      ],
+      "notes": "Use Mn as a possible nutrient-state or root-zone marker, not a direct fertilizer target.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "1b638b4542dedd5c98dd1ff2c7c512d72f8d7c27af5709df3c5bfff00def31cb"
+    },
+    {
+      "id": "FE",
+      "title": "Iron",
+      "kind": "nutrient",
+      "file": "pdfs/APP-FE-001_Iron.pdf",
+      "source": "part2",
+      "pages": [
+        8
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.Fe",
+        "soil.pH",
+        "water.bicarbonate",
+        "root.status",
+        "irrigation.drainage"
+      ],
+      "diagnostic_flags": [
+        "iron",
+        "iron_chlorosis",
+        "bicarbonate",
+        "high_pH"
+      ],
+      "default_companions": [
+        "CTX-WATER",
+        "CTX-ROOT"
+      ],
+      "notes": "Leaf Fe alone may mislead; pH, bicarbonate, aeration, and root health are required context.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "6e12a24dd7a75de384d6a48cdc3e748ce9bfc24c250f7d365f30d92da01ba2f0"
+    },
+    {
+      "id": "ZN",
+      "title": "Zinc",
+      "kind": "nutrient",
+      "file": "pdfs/APP-ZN-001_Zinc.pdf",
+      "source": "part2",
+      "pages": [
+        9
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.Zn",
+        "soil.pH",
+        "water.bicarbonate",
+        "leaf.P",
+        "root.status"
+      ],
+      "diagnostic_flags": [
+        "zinc",
+        "rosetting",
+        "ZnxB"
+      ],
+      "default_companions": [],
+      "notes": "Interpret with P, pH, bicarbonate, roots, and spray history. Zn by B is research context only.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "177c2f2708c2e2bf1ed766c9123533e825021bfe756433655a828977cf842745"
+    },
+    {
+      "id": "CL",
+      "title": "Chloride",
+      "kind": "nutrient",
+      "file": "pdfs/APP-CL-001_Chloride.pdf",
+      "source": "part1",
+      "pages": [
+        10,
+        11
+      ],
+      "trigger_mode": "diagnostic_flag",
+      "evidence_level": "hazard_and_context",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.Cl",
+        "water.Cl",
+        "water.EC",
+        "soil.ECe",
+        "irrigation.uniformity",
+        "irrigation.drainage"
+      ],
+      "diagnostic_flags": [
+        "chloride",
+        "salinity",
+        "tip_burn",
+        "KxCl"
+      ],
+      "default_companions": [
+        "CTX-WATER"
+      ],
+      "notes": "Attach for chloride, salinity, tip-burn, or K by Cl findings; do not use yield opportunity alone.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "b814bee46736089edb38edb7bd133b9d1318d843335e73bb58730818994754d3"
+    },
+    {
+      "id": "MG",
+      "title": "Magnesium",
+      "kind": "nutrient",
+      "file": "pdfs/APP-MG-001_Magnesium.pdf",
+      "source": "part2",
+      "pages": [
+        10
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "management_context",
+      "required_data_for_management": [
+        "leaf.Mg",
+        "soil.exchangeable_Mg",
+        "water.Mg",
+        "soil.CEC",
+        "root.status"
+      ],
+      "diagnostic_flags": [
+        "magnesium",
+        "CaxMg"
+      ],
+      "default_companions": [],
+      "notes": "Interpret with K, Ca, Na, CEC, irrigation water, and roots; avoid fixed universal ratios.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "d9114c033189227c66d06cbeaddc431a9d10b3bc72c918d961d9fec862f272d3"
+    },
+    {
+      "id": "B",
+      "title": "Boron",
+      "kind": "nutrient",
+      "file": "pdfs/APP-B-001_Boron.pdf",
+      "source": "part2",
+      "pages": [
+        11
+      ],
+      "trigger_mode": "opportunity_or_flag",
+      "evidence_level": "safety_sensitive",
+      "max_action_level": "diagnostic_only",
+      "required_data_for_management": [
+        "leaf.B",
+        "water.B",
+        "water.EC",
+        "input_history.B",
+        "irrigation.drainage"
+      ],
+      "diagnostic_flags": [
+        "boron",
+        "boron_toxicity",
+        "PxB",
+        "ZnxB"
+      ],
+      "default_companions": [
+        "CTX-WATER",
+        "CTX-FIELD-DATA"
+      ],
+      "notes": "Narrow safety margin. No automatic treatment recommendation from a model signal.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "4b9cb472ab632416aa216d252ced79dfe57b2afedc9f2d15f77aa1d09a2f81f8"
+    },
+    {
+      "id": "CTX-ROOT",
+      "title": "Shared Root Zone Foundation",
+      "kind": "context",
+      "file": "pdfs/CTX-ROOT-001_Shared_Root_Zone_Foundation.pdf",
+      "source": "part1",
+      "pages": [
+        3
+      ],
+      "trigger_mode": "field_flag",
+      "evidence_level": "established",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "root_zone_stress",
+        "compaction",
+        "waterlogging",
+        "poor_aeration",
+        "root_disease",
+        "drainage"
+      ],
+      "default_companions": [],
+      "notes": "Root, air, water, texture, infiltration, drainage, and leaching foundation.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "b5e39ea3a7f97b1e921d9dbbff79bb0ee36db7caa61be5716ff20d8a3989bef2"
+    },
+    {
+      "id": "CTX-WATER",
+      "title": "pH Water Chemistry and Irrigation",
+      "kind": "context",
+      "file": "pdfs/CTX-WATER-001_pH_Water_Chemistry_and_Irrigation.pdf",
+      "source": "part1",
+      "pages": [
+        4
+      ],
+      "trigger_mode": "field_flag",
+      "evidence_level": "established",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "salinity",
+        "sodicity",
+        "chloride",
+        "sodium",
+        "boron",
+        "bicarbonate",
+        "irrigation",
+        "leaching"
+      ],
+      "default_companions": [],
+      "notes": "Shared pH, EC, SAR, ion-toxicity, irrigation, and drainage context.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "72d4faa2c3e577d1b70a977aacd5ce38c259ef2396c49bbedae4d16fe18f57e0"
+    },
+    {
+      "id": "CTX-BIOLOGY",
+      "title": "Microbes Chelation and PGPR",
+      "kind": "context",
+      "file": "pdfs/CTX-BIOLOGY-001_Microbes_Chelation_and_PGPR.pdf",
+      "source": "part1",
+      "pages": [
+        5
+      ],
+      "trigger_mode": "field_flag",
+      "evidence_level": "product_dependent",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "microbial_product",
+        "chelate",
+        "organic_acid",
+        "PGPR"
+      ],
+      "default_companions": [
+        "CTX-ROOT"
+      ],
+      "notes": "Use when biological products, chelates, or root-stimulation claims are discussed.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "09aea9bbcfb38b1dd5641c5ead01b74e7b86b8e13f5eaf7e223423e35aa9409d"
+    },
+    {
+      "id": "CTX-OM",
+      "title": "Organic Matter",
+      "kind": "context",
+      "file": "pdfs/CTX-OM-001_Organic_Matter.pdf",
+      "source": "part1",
+      "pages": [
+        6,
+        7
+      ],
+      "trigger_mode": "field_flag",
+      "evidence_level": "established_with_context",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "organic_matter",
+        "compost",
+        "manure",
+        "mulch",
+        "carbon_product"
+      ],
+      "default_companions": [],
+      "notes": "Benefits, limitations, input quality, salinity, and nutrient-budget checks.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "865abca7eb6845a66ce5a191420b8e3bce957d1b7c7db0b4862a127b07ad044d"
+    },
+    {
+      "id": "CTX-MATRIX",
+      "title": "Quick Diagnostic Matrix",
+      "kind": "context",
+      "file": "pdfs/CTX-MATRIX-001_Quick_Diagnostic_Matrix.pdf",
+      "source": "part1",
+      "pages": [
+        12
+      ],
+      "trigger_mode": "system",
+      "evidence_level": "diagnostic_context",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "conflicting_symptoms",
+        "multiple_findings"
+      ],
+      "default_companions": [],
+      "notes": "Attach when symptoms conflict or several environmental findings must be reconciled.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part1.pdf",
+      "sha256": "626dda577c0972b48c606fb2a72d8983f29380f5387681fd55c7f0731e20ccf8"
+    },
+    {
+      "id": "CTX-INTERACTIONS",
+      "title": "Nutrient Interaction and Root Zone Map",
+      "kind": "context",
+      "file": "pdfs/CTX-INTERACTIONS-001_Nutrient_Interaction_and_Root_Zone_Map.pdf",
+      "source": "part2",
+      "pages": [
+        12
+      ],
+      "trigger_mode": "system",
+      "evidence_level": "mixed_established_and_research",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "KxCl",
+        "KxS",
+        "KxCa",
+        "CaxMg",
+        "PxB",
+        "ZnxB",
+        "multiple_nutrients"
+      ],
+      "default_companions": [],
+      "notes": "Attach for two or more nutrient modules or any named interaction flag.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "e2781ca0ca068cc0c6d992624a86c27f0154941045c50688747b9b4f43127677"
+    },
+    {
+      "id": "CTX-FIELD-DATA",
+      "title": "Minimum Field Data Package",
+      "kind": "context",
+      "file": "pdfs/CTX-FIELD-DATA-001_Minimum_Field_Data_Package.pdf",
+      "source": "part2",
+      "pages": [
+        13
+      ],
+      "trigger_mode": "system",
+      "evidence_level": "established",
+      "max_action_level": "diagnostic_context",
+      "required_data_for_management": [],
+      "diagnostic_flags": [
+        "missing_context",
+        "provisional",
+        "research_only"
+      ],
+      "default_companions": [],
+      "notes": "Attach when required diagnostic data are missing or evidence remains provisional.",
+      "source_document": "Avocado_DST_Phase2_Soil_Environmental_Resource_Bank_Part2.pdf",
+      "sha256": "9663878ded0bcd699c2153e4b69126a60c9193c454e34da5e5f00062e6a29c1e"
+    }
+  ]
+}
