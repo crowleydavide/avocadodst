@@ -1,0 +1,133 @@
+{
+  "policy_version": "2026.10.02-pilot.9.2.4b",
+  "status": "provisional_phase_2_pilot",
+  "uptake_gate_mode": "shadow_only",
+  "uptake_gate_policy_version": "2026.09.23-shadow.1",
+  "scan_grid_points": 51,
+  "batch_workspace_policy": {
+    "schema_version": "2026.09.27-batch.1",
+    "max_samples_per_upload": 500,
+    "mode": "prioritization_only",
+    "shared_field_context": false,
+    "batch_management_plans": false,
+    "batch_pdf": false
+  },
+  "opportunity_bands_yp": {
+    "watchlist_start": 7.5,
+    "appendix_gate": 10.0,
+    "high_priority_start": 15.0
+  },
+  "opportunity_curve_policy": {
+    "mode": "pilot_interpretive_only",
+    "display_threshold_yp": 7.5,
+    "near_peak_fraction": 0.9,
+    "max_report_curves": 3
+  },
+  "replacement_budget_policy": {
+    "mode": "pilot_planning_only",
+    "supported_nutrients": [
+      "N",
+      "P",
+      "K",
+      "CA"
+    ],
+    "requires_explicit_recovery_for_applied_amount": true,
+    "upper_side_potassium_requires_reconciliation": true,
+    "adviser_override_requires_written_reason": true,
+    "units": "elemental_lb_per_bearing_acre",
+    "model_curve_sets_rate": false
+  },
+  "nutrient_support": {
+    "N": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "P": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "K": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "CA": {
+      "support_status": "validated",
+      "stability": "stable"
+    },
+    "MG": {
+      "support_status": "provisional",
+      "stability": "mixed"
+    },
+    "ZN": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "MN": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "FE": {
+      "support_status": "operational",
+      "stability": "stable"
+    },
+    "B": {
+      "support_status": "provisional",
+      "stability": "mixed"
+    },
+    "CL": {
+      "support_status": "provisional",
+      "stability": "mixed"
+    },
+    "S": {
+      "support_status": "research_only",
+      "stability": "unstable"
+    }
+  },
+  "nutrient_field_policy": {
+    "schema_version": "2026.09.29-nutrient-field-shadow.2",
+    "mode": "adviser_shadow_only",
+    "grower_report_enabled": false,
+    "management_gate_effect": false,
+    "opportunity_yp_effect": false,
+    "fertilizer_rate_effect": false,
+    "fields": {
+      "B_Mn_Zn": {
+        "status": "leading_validated_shadow",
+        "headline_agreement_fraction": 0.8
+      },
+      "Ca_Mn_Zn": {
+        "status": "secondary_validated_shadow",
+        "headline_agreement_fraction": 0.8
+      }
+    },
+    "context_method": "all_validated_historical_contexts",
+    "categorical_headline_rule": "at_least_80_percent_context_agreement",
+    "otherwise_label": "Context-dependent",
+    "surface_quantity": "smoothed_observed_within_year_yield_percentile_development_only",
+    "surface_extrapolation": false,
+    "causal_language_allowed": false
+  },
+  "collective_opportunity_research": {
+    "status": "research_only_not_rendered",
+    "reason": "Universal collective-opportunity score did not validate as an independent current-performance indicator in Experiment 3.",
+    "individual_opportunities_additive": false
+  },
+  "communication_policy_9_2_4": {
+    "primary_result": "nutrition_associated_yp",
+    "direction_labels": [
+      "Low",
+      "In range",
+      "High"
+    ],
+    "high_side_corrective_application": false,
+    "high_side_replacement_requires_independent_basis": true,
+    "diagnosis_sequence": [
+      "verify",
+      "supply_or_uptake",
+      "act",
+      "check_response"
+    ],
+    "frozen_model_unchanged": true,
+    "opportunity_thresholds_unchanged": true
+  }
+}
